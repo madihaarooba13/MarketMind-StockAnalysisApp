@@ -292,7 +292,10 @@ export default function Home() {
 
       {/* Navbar */}
       {/* <Navbar onSearch={fetchStock} /> */}
-      <Navbar />
+      {/* <Navbar /> */}
+      <div className="fixed top-0 left-0 w-full z-50">
+  <Navbar />
+</div>
 
 
 

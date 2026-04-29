@@ -145,7 +145,7 @@
 // }
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect , useRef } from "react";
 import { Search, Bell, User, Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -158,6 +158,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   // import { signIn, signOut, useSession } from "next-auth/react";
 
@@ -206,6 +207,33 @@ export default function Navbar() {
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/?logout=success" });
   };
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      profileRef.current &&
+      !profileRef.current.contains(event.target)
+    ) {
+      setProfileOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
+const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const checkScreen = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+  checkScreen();
+  window.addEventListener("resize", checkScreen);
+
+  return () => window.removeEventListener("resize", checkScreen);
+}, []);
 
   useEffect(() => {
   if (menuOpen) {
@@ -305,8 +333,14 @@ focus-within:ring-2 focus-within:ring-blue-400
 
           <input
             type="text"
-            placeholder="Try AAPL, TSLA..."
-           className="bg-transparent outline-none flex-1 pr-10 text-gray-900 dark:text-white 
+            placeholder={
+  session
+    ? "Try AAPL, TSLA..."
+    : isMobile
+      ? "Find..."
+      : "Try AAPL, TSLA..."
+}
+           className="bg-transparent outline-none flex-1 min-w-0 text-gray-900 dark:text-white 
 placeholder-gray-500 dark:placeholder-gray-400
 focus:placeholder-gray-300 z-10 text-sm"
             value={query}
@@ -392,7 +426,7 @@ hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm"
           {/* <User className="hidden sm:block w-5 sm:w-6 h-5 sm:h-6 cursor-pointer text-gray-700 dark:text-gray-300 
           hover:text-blue-500 dark:hover:text-blue-400 transition" /> */}
 
-          <div className="relative block">
+          <div ref={profileRef} className="relative block">
             <div className="relative ">
               {session ? (
                 <div

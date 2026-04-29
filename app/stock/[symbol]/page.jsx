@@ -92,7 +92,7 @@ export default function StockPage() {
   }, [price]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#020617] text-white relative overflow-hidden mt-7 lg:mt-0">
 
       {/* 🔥 glow effect */}
       {/* <div className="absolute w-[400px] h-[400px] bg-blue-500/20 blur-[120px] top-10 left-20"></div>
