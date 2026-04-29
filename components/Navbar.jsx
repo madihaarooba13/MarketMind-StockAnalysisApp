@@ -335,10 +335,10 @@ focus-within:ring-2 focus-within:ring-blue-400
             type="text"
             placeholder={
   session
-    ? "Try AAPL, TSLA..."
+    ? "Try AAPL ,TSLA..."
     : isMobile
       ? "Find..."
-      : "Try AAPL, TSLA..."
+      : "Try AAPL , TSLA..."
 }
            className="bg-transparent outline-none flex-1 min-w-0 text-gray-900 dark:text-white 
 placeholder-gray-500 dark:placeholder-gray-400
