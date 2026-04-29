@@ -13,10 +13,9 @@ function formatSymbol(sym) {
   return s;
 }
 
-export async function GET(req, context) {
+export async function GET(req, { params }) {
   try {
-    const { symbol: raw } = await context.params;
-    const symbol = formatSymbol(raw);
+    const symbol = formatSymbol(params.symbol);
 
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=1mo&interval=15m`,
@@ -27,8 +26,8 @@ export async function GET(req, context) {
     );
 
     const data = await res.json();
-
     const result = data.chart?.result?.[0];
+
     if (!result) return Response.json([]);
 
     const timestamps = result.timestamp || [];
@@ -39,14 +38,15 @@ export async function GET(req, context) {
         if (price == null || price === 0) return null;
         return {
           time: timestamps[i],
-          value: Number(price.toFixed(2)), // 👈 smoothing
+          value: Number(price.toFixed(2)),
         };
       })
       .filter(Boolean);
 
-    return Response.json(chart);
+    return Response.json(chart); // ✅ ONLY ARRAY
+
   } catch (err) {
-    console.error(err);
+    console.error("CHART ERROR:", err);
     return Response.json([]);
   }
 }
