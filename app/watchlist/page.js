@@ -101,8 +101,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useRouter } from "next/navigation";
 import StockCard from "../../components/StockCard";
-import { useSession } from "next-auth/react";
-
+import { useSession, signIn } from "next-auth/react";
 export default function WatchlistPage() {
   const [stocks, setStocks] = useState([]);
   const router = useRouter();
@@ -144,10 +143,23 @@ export default function WatchlistPage() {
         <h2 className="text-2xl font-semibold mb-6">Your Watchlist</h2>
 
         {!session ? (
-          <div className="text-center p-10">
-            <p>Please login to view your watchlist</p>
-          </div>
-        ) : !stocks || stocks.length === 0 ? (
+  <div className="text-center border border-dashed border-white/20 p-10 rounded-xl flex flex-col items-center gap-4">
+    
+    <p className="text-gray-400">
+      Please login to view your watchlist
+    </p>
+
+    <button
+    // onClick={() => signIn(undefined, { callbackUrl: "/watchlist" })}
+    onClick={() => signIn(undefined, { callbackUrl: "/watchlist" })}
+    
+      className="px-5 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 transition text-white text-sm"
+    >
+      Login
+    </button>
+
+  </div>
+) : !stocks || stocks.length === 0 ? (
           <div className="text-center border border-dashed border-white/20 p-10 rounded-xl">
             <p className="text-gray-400">No stocks added yet</p>
           </div>
