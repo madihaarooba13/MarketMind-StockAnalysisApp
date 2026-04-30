@@ -31,6 +31,12 @@ export default function MarketDetail() {
   const isNifty = params.type === "nifty";
   const symbol = isNifty ? "^NSEI" : "^BSESN";
   const marketName = isNifty ? "NIFTY 50" : "SENSEX";
+  // 🔥 COLOR LOGIC (based on % change)
+const change = Number(marketData?.change);
+
+const isUp = !isNaN(change) ? change >= 0 : true;
+
+const chartColor = isUp ? "#22c55e" : "#ef4444";
 
   // 🔥 FETCH MARKET INFO (same as home)
   useEffect(() => {
@@ -139,7 +145,7 @@ export default function MarketDetail() {
               Loading chart...
             </div>
           ) : (
-            <BigChart data={chartData} />
+            <BigChart data={chartData} color={chartColor} />
           )}
 
         </div>

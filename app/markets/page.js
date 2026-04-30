@@ -191,7 +191,7 @@
 
 //                 {/* 🔥 CHART */}
 //                 <div className="h-[320px]">
-//                   <BigChart data={chartData} />
+//                   <BigChart data={chartData} color={chartColor} />
 //                 </div>
 
 //                 <div className="mt-4 flex justify-between text-sm text-gray-400">
@@ -247,6 +247,12 @@ export default function MarketsPage() {
   const [showTop, setShowTop] = useState(false);
   const [showBottom, setShowBottom] = useState(true);
   const listRef = useRef(null);
+  // 🔥 COLOR FIX (based on % change)
+const change = Number(selectedStock?.change);
+
+const isUp = !isNaN(change) ? change >= 0 : true;
+
+const chartColor = isUp ? "#22c55e" : "#ef4444";
 
 
   const router = useRouter();
@@ -462,7 +468,7 @@ md:mt-0 md:sticky md:top-24 h-fit">
 
                 {/* CHART */}
                 <div className="h-[260px] rounded-lg overflow-hidden">
-                  <BigChart data={chartData} />
+                  <BigChart data={chartData} color={chartColor} />
                 </div>
 
                 {/* EXTRA INFO */}

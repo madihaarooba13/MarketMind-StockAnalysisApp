@@ -1,29 +1,4 @@
-// "use client";
 
-// export default function MarketInfoCard({ title, data }) {
-//   if (!data) return null;
-
-//   return (
-//     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 h-full
-//     hover:scale-[1.02] transition-all duration-300">
-
-//       <p className="text-sm text-gray-400">{title}</p>
-
-//       <p className="text-3xl font-bold mt-2">
-//         ₹ {data.price}
-//       </p>
-
-//       <p className={`mt-2 ${
-//         parseFloat(data.change) >= 0
-//           ? "text-green-400"
-//           : "text-red-400"
-//       }`}>
-//         {parseFloat(data.change) >= 0 ? "▲" : "▼"} {data.change}%
-//       </p>
-
-//     </div>
-//   );
-// }
 
 
 "use client";

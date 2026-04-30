@@ -1,80 +1,39 @@
-
-
-// "use client";
-
-// import { useEffect, useRef } from "react";
-// // import { createChart } from "lightweight-charts";
-// import { createChart } from "lightweight-charts";
-
-// export default function BigChart({ data }) {
-//   const chartRef = useRef();
-
-//   useEffect(() => {
-//     if (!chartRef.current || !data.length) return;
-
-//    const chart = createChart(chartRef.current, {
-//   layout: {
-//     background: { color: "#020617" },
-//     textColor: "#ccc",
-//   },
-//   grid: {
-//     vertLines: { color: "rgba(255,255,255,0.03)" },
-//     horzLines: { color: "rgba(255,255,255,0.03)" },
-//   },
-
-//   // 🔥 ADD THIS BLOCK
-//   crosshair: {
-//     mode: 1,
-//     vertLine: {
-//       color: "#6b7280",
-//       width: 1,
-//       style: 0,
-//     },
-//     horzLine: {
-//       color: "#6b7280",
-//       width: 1,
-//       style: 0,
-//     },
-//   },
-
-//   width: chartRef.current.clientWidth,
-//   height: 250,
-// });
-
-// const lineSeries = chart.addLineSeries({
-//   color: isUp ? "#4ade80" : "#ef4444",
-//   lineWidth: 3,
-//   priceLineVisible: true,   // 🔥 THIS
-//   lastValueVisible: true,
-// });
-
-// // 🔥 ADD THIS JUST BELOW
-// lineSeries.applyOptions({
-//   lineColor: "#22c55e",
-//   topColor: "rgba(34,197,94,0.4)",
-//   bottomColor: "rgba(34,197,94,0.05)",
-// });
-
-//     lineSeries.setData(data);
-
-//     return () => chart.remove();
-//   }, [data]);
-
-//   return <div ref={chartRef} className="w-full" />;
-// }
-
-
 "use client";
 
 import { useEffect, useRef } from "react";
 import { createChart } from "lightweight-charts";
 
-export default function BigChart({ data }) {
-  const chartRef = useRef();
+export default function BigChart({ data, color }) {
+  const chartRef = useRef(null);
 
   useEffect(() => {
-    if (!chartRef.current || !data?.length) return;
+    if (!chartRef.current || !data || data.length === 0) return;
 
+    // ✅ CLEAN DATA
+    const cleanData = data.filter(
+      (d) =>
+        d &&
+        d.time !== undefined &&
+        d.value !== undefined &&
+        !isNaN(d.value)
+    );
+
+    if (cleanData.length < 2) return;
+
+    // ✅ COLOR FROM PARENT (SOURCE OF TRUTH)
+    const lineColor = color || "#22c55e";
+
+    const isGreen = lineColor === "#22c55e";
+
+    const topColor = isGreen
+      ? "rgba(34,197,94,0.4)"
+      : "rgba(239,68,68,0.35)";
+
+    const bottomColor = isGreen
+      ? "rgba(34,197,94,0.02)"
+      : "rgba(239,68,68,0.02)";
+
+    // 🔥 CREATE CHART
     const chart = createChart(chartRef.current, {
       width: chartRef.current.clientWidth,
       height: 250,
@@ -89,19 +48,10 @@ export default function BigChart({ data }) {
         horzLines: { color: "rgba(255,255,255,0.03)" },
       },
 
-      // ✅ CROSSHAIR (interactive feel)
       crosshair: {
         mode: 1,
-        vertLine: {
-          color: "#6b7280",
-          width: 1,
-          style: 0,
-        },
-        horzLine: {
-          color: "#6b7280",
-          width: 1,
-          style: 0,
-        },
+        vertLine: { color: "#6b7280", width: 1 },
+        horzLine: { color: "#6b7280", width: 1 },
       },
 
       rightPriceScale: {
@@ -113,57 +63,42 @@ export default function BigChart({ data }) {
       },
     });
 
-    const isUp =
-      data[data.length - 1]?.value >= data[0]?.value;
-    // ✅ CLEAN LINE SERIES (NO WRONG OPTIONS)
-    const lineSeries = chart.addAreaSeries({
-      lineColor: isUp ? "#4ade80" : "#ef4444",
-
-      topColor: isUp
-        ? "rgba(74,222,128,0.4)"
-        : "rgba(239,68,68,0.35)",
-
-      bottomColor: isUp
-        ? "rgba(74,222,128,0.02)"
-        : "rgba(239,68,68,0.02)",
-
+    // 🔥 AREA SERIES
+    const series = chart.addAreaSeries({
+      lineColor: lineColor,
+      topColor: topColor,
+      bottomColor: bottomColor,
       lineWidth: 3,
       priceLineVisible: true,
       lastValueVisible: true,
     });
 
-    // ✅ PRICE LINE STYLE (THIS IS YOUR “aisi line” 🔥)
-    lineSeries.applyOptions({
-      priceLineColor: isUp ? "#22c55e" : "#ef4444",
-      priceLineStyle: 2, // dotted
+    // ✅ SET DATA
+    series.setData(cleanData);
+
+    // ✅ PRICE LINE
+    series.applyOptions({
+      priceLineColor: lineColor,
       priceLineWidth: 1,
+      priceLineStyle: 2,
     });
 
-    lineSeries.setData(data);
-
-    const lastPoint = data[data.length - 1];
-
+    // ✅ LAST POINT MARKER
+    const lastPoint = cleanData[cleanData.length - 1];
     if (lastPoint) {
-      lineSeries.setMarkers([
+      series.setMarkers([
         {
           time: lastPoint.time,
           position: "inBar",
-          color: isUp ? "#4ade80" : "#ef4444",
+          color: lineColor,
           shape: "circle",
           size: 1,
         },
       ]);
     }
-    setTimeout(() => {
-      chart.timeScale().fitContent();
-    }, 100);
 
-
-
-    // ✅ FIT GRAPH PROPERLY
     chart.timeScale().fitContent();
 
-    // ✅ RESPONSIVE
     const handleResize = () => {
       chart.applyOptions({
         width: chartRef.current.clientWidth,
@@ -176,7 +111,7 @@ export default function BigChart({ data }) {
       window.removeEventListener("resize", handleResize);
       chart.remove();
     };
-  }, [data]);
+  }, [data, color]);
 
   return <div ref={chartRef} className="w-full" />;
 }
