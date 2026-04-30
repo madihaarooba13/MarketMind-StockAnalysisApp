@@ -1,24 +1,15 @@
-export const dynamic = "force-dynamic";
-
-function formatSymbol(sym) {
-  if (!sym) return "AAPL";
-  const s = sym.toUpperCase();
-
-  if (["AAPL","TSLA","MSFT","AMZN","GOOGL","NVDA","META"].includes(s)) {
-    return s;
-  }
-
-  if (!s.includes(".NS")) return `${s}.NS`;
-
-  return s;
-}
-
 export async function GET(req, { params }) {
   try {
-    const symbol = formatSymbol(params.symbol);
+    const { symbol } = await params;
+    const formatted = symbol.toUpperCase();
+    const { searchParams } = new URL(req.url);
+    const range = searchParams.get("range") || "1mo";
+    
+    // ✅ FIX: 1mo range ke liye interval '1d' rakhein taaki axis saaf ho jaye
+    const interval = range === "1mo" ? "1d" : "15m";
 
     const res = await fetch(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=1mo&interval=15m`,
+      `https://query1.finance.yahoo.com/v8/finance/chart/${formatted}?range=${range}&interval=${interval}`,
       {
         headers: { "User-Agent": "Mozilla/5.0" },
         cache: "no-store",
@@ -33,20 +24,18 @@ export async function GET(req, { params }) {
     const timestamps = result.timestamp || [];
     const closes = result.indicators?.quote?.[0]?.close || [];
 
-    const chart = closes
-      .map((price, i) => {
-        if (price == null || price === 0) return null;
-        return {
-          time: timestamps[i],
-          value: Number(price.toFixed(2)),
-        };
-      })
-      .filter(Boolean);
+    const chart = timestamps.map((time, i) => {
+      const price = closes[i];
+      if (price == null || price === 0) return null;
+      return {
+        time: time, 
+        value: Number(price.toFixed(2)),
+      };
+    }).filter(Boolean);
 
-    return Response.json(chart); // ✅ ONLY ARRAY
+    return Response.json(chart);
 
   } catch (err) {
-    console.error("CHART ERROR:", err);
     return Response.json([]);
   }
 }
